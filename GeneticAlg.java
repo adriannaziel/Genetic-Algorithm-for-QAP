@@ -3,14 +3,29 @@ import java.util.Collections;
 import java.util.Random;
 
 public class GeneticAlg {
-    int amount = 4 ;
-    int pop_size = 100;
-    double pm = 0.01;
-    double px = 0.7;
-    int generations = 10;
+
+    int pop_size ;
+    int generations ;
+    double pm;
+    double px;
+    int amount;
+
+
+
 
     short[][] distance_matrix;
     short[][] flow_matrix;
+
+    public GeneticAlg(int pop_size, int generations, double pm, double px, int amount){
+        this.pop_size = pop_size;
+        this.generations = generations;
+        this.pm = pm;
+        this.px = px;
+        this.amount = amount;
+
+        fillFlowMx();
+        fillDstMx();
+    }
 
 
     ////////////////////
@@ -20,52 +35,52 @@ public class GeneticAlg {
 
 
     public void fillDstMx(){
-//           distance_matrix = new short[][]{
-//                   {0, 1, 2, 2, 3, 4, 4, 5, 3, 5, 6, 7},
-//                   {1, 0, 1, 1, 2, 3, 3, 4, 2, 4, 5, 6},
-//                   {2, 1, 0, 2, 1, 2, 2, 3, 1, 3, 4, 5},
-//                   {2, 1, 2, 0, 1, 2, 2, 3, 3, 3, 4, 5},
-//                   {3, 2, 1, 1, 0, 1, 1, 2, 2, 2, 3, 4},
-//                   {4, 3, 2, 2, 1, 0, 2, 3, 3, 1, 2, 3},
-//                   {4, 3, 2, 2, 1, 2, 0, 1, 3, 1, 2, 3},
-//                   {5, 4, 3, 3, 2, 3, 1, 0, 4, 2, 1, 2},
-//                   {3, 2, 1, 3, 2, 3, 3, 4, 0, 4, 5, 6},
-//                   {5, 4, 3, 3, 2, 1, 1, 2, 4, 0, 1, 2},
-//                   {6, 5, 4, 4, 3, 2, 2, 1, 5, 1, 0, 1},
-//                   {7, 6, 5, 5, 4, 3, 3, 2, 6, 2, 1, 0}
-//           };
+           distance_matrix = new short[][]{
+                   {0, 1, 2, 2, 3, 4, 4, 5, 3, 5, 6, 7},
+                   {1, 0, 1, 1, 2, 3, 3, 4, 2, 4, 5, 6},
+                   {2, 1, 0, 2, 1, 2, 2, 3, 1, 3, 4, 5},
+                   {2, 1, 2, 0, 1, 2, 2, 3, 3, 3, 4, 5},
+                   {3, 2, 1, 1, 0, 1, 1, 2, 2, 2, 3, 4},
+                   {4, 3, 2, 2, 1, 0, 2, 3, 3, 1, 2, 3},
+                   {4, 3, 2, 2, 1, 2, 0, 1, 3, 1, 2, 3},
+                   {5, 4, 3, 3, 2, 3, 1, 0, 4, 2, 1, 2},
+                   {3, 2, 1, 3, 2, 3, 3, 4, 0, 4, 5, 6},
+                   {5, 4, 3, 3, 2, 1, 1, 2, 4, 0, 1, 2},
+                   {6, 5, 4, 4, 3, 2, 2, 1, 5, 1, 0, 1},
+                   {7, 6, 5, 5, 4, 3, 3, 2, 6, 2, 1, 0}
+           };
 
-        distance_matrix = new short[][]{
-                {0,22,53,53},
-                {22,0,40,62},
-                {53,40,0,55},
-                {53,62,55,0}
-        };
+//        distance_matrix = new short[][]{
+//                {0,22,53,53},
+//                {22,0,40,62},
+//                {53,40,0,55},
+//                {53,62,55,0}
+//        };
     }
 
     public void fillFlowMx(){
-//            flow_matrix = new short[][]
-//                    {
-//                            {0, 3, 4, 6, 8, 5, 6, 6, 5, 1, 4, 6},
-//                            {3, 0, 6, 3, 7, 9, 9, 2, 2, 7, 4, 7},
-//                            {4, 6, 0, 2, 6, 4, 4, 4, 2, 6, 3, 6},
-//                            {6, 3, 2, 0, 5, 5, 3, 3, 9, 4, 3, 6},
-//                            {8, 7, 6, 5, 0, 4, 3, 4, 5, 7, 6, 7},
-//                            {5, 9, 4, 5, 4, 0, 8, 5, 5, 5, 7, 5},
-//                            {6, 9, 4, 3, 3, 8, 0, 6, 8, 4, 6, 7},
-//                            {6, 2, 4, 3, 4, 5, 6, 0, 1, 5, 5, 3},
-//                            {5, 2, 2, 9, 5, 5, 8, 1, 0, 4, 5, 2},
-//                            {1, 7, 6, 4, 7, 5, 4, 5, 4, 0, 7, 7},
-//                            {4, 4, 3, 3, 6, 7, 6, 5, 5, 7, 0, 9},
-//                            {6, 7, 6, 6, 7, 5, 7, 3, 2, 7, 9, 0}
-//                    };
+            flow_matrix = new short[][]
+                    {
+                            {0, 3, 4, 6, 8, 5, 6, 6, 5, 1, 4, 6},
+                            {3, 0, 6, 3, 7, 9, 9, 2, 2, 7, 4, 7},
+                            {4, 6, 0, 2, 6, 4, 4, 4, 2, 6, 3, 6},
+                            {6, 3, 2, 0, 5, 5, 3, 3, 9, 4, 3, 6},
+                            {8, 7, 6, 5, 0, 4, 3, 4, 5, 7, 6, 7},
+                            {5, 9, 4, 5, 4, 0, 8, 5, 5, 5, 7, 5},
+                            {6, 9, 4, 3, 3, 8, 0, 6, 8, 4, 6, 7},
+                            {6, 2, 4, 3, 4, 5, 6, 0, 1, 5, 5, 3},
+                            {5, 2, 2, 9, 5, 5, 8, 1, 0, 4, 5, 2},
+                            {1, 7, 6, 4, 7, 5, 4, 5, 4, 0, 7, 7},
+                            {4, 4, 3, 3, 6, 7, 6, 5, 5, 7, 0, 9},
+                            {6, 7, 6, 6, 7, 5, 7, 3, 2, 7, 9, 0}
+                    };
 
-        flow_matrix = new short[][]{
-                {0,3,0,2},
-                {3,0,0,1},
-                {0,0,0,4},
-                {2,1,4,0}
-        };
+//        flow_matrix = new short[][]{
+//                {0,3,0,2},
+//                {3,0,0,1},
+//                {0,0,0,4},
+//                {2,1,4,0}
+//        };
     }
 
 
@@ -202,7 +217,7 @@ public class GeneticAlg {
 
         int i = 0;
         do{
-            int position = random.nextInt(tournament_size);   // moze wybrac te same...
+            int position = random.nextInt(tournament_size);   // moze wybrac te same... przekazywac kopie pop i usuwac tutaj z niej wybrane?
             tournament_pop.addIndividual(pop.getIndividuals().get(position));
 
             //System .out.println(i + " " + position );
@@ -227,8 +242,11 @@ public class GeneticAlg {
         }
             return best_individual;
     }
+
+//        public  Individual selectByRoulette(Population pop){
+//        double random_nr = new Random().nextDouble();
 //
-//        public short[] selectByRoulette(Population pop){ //param? populacja?
+//
 //
 //        }
 
@@ -249,14 +267,83 @@ public class GeneticAlg {
     }
 
 
-    public static void main(String[] args) {
-        GeneticAlg ga = new GeneticAlg();
-        ga.fillDstMx();
-        ga.fillFlowMx();
+    public void runAlgorithmWithTournament(int tournament_size){ //params
+        Population new_population = generateFirstPopulation(pop_size);
+        Population old_population;
 
-        for(Individual ind : ga.generateFirstPopulation(10).getIndividuals()){
-            ga.printArray(ind.getGenes());
+        Random random = new Random();
+
+        for(int generation_nr=0; generation_nr<generations; generation_nr++){//DLA KAZDEJ POPULACJI
+            //best worse avg
+
+            populationResults(new_population);
+
+             old_population = new_population;
+             new_population = new Population(pop_size);
+
+
+            for(int ind_nr=0; ind_nr <pop_size;ind_nr++){//tyle ile ma byc osobnikow w nowej
+
+                Individual current_ind = selectByTournament(old_population,tournament_size);
+
+                double cross = random.nextDouble(); //random nr that determines wheather individual will be crossed
+
+                if(cross<=px){//crossover   //todo:słabo bo może wybrac siebie do krzyzowania
+                    Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size-1)); //random partner for crossover
+                    Individual child = crossover(current_ind, partner);
+                    new_population.addIndividual(child);
+                }//if(cross<=px)
+                else{//no crossover
+                    Individual ind_to_new_pop = mutate(current_ind.clone());//MUTOWAĆ KOPIĘ!!!
+                    new_population.addIndividual(ind_to_new_pop);
+                }// else if(cross<=px){
+
+            }//for(int ind_nr=0; ind_nr <pop_size;i++){
+
+
+        }//for(generation_nr...)
+
+    }
+
+
+    private void populationResults(Population population) { //0?
+        int best_value=countFitnessFunction(population.getIndividuals().get(0));
+        int worst_value=countFitnessFunction(population.getIndividuals().get(0));
+        int avg_value=0;
+        int fitness_sum=0;
+
+        Individual bi = population.getIndividuals().get(0);
+
+        for(Individual ind : population.getIndividuals()){
+            int fitness_val = countFitnessFunction(ind);
+
+            if(fitness_val<best_value){
+                best_value = fitness_val;
+                bi = ind;
+            }
+
+            if(fitness_val>worst_value){
+                worst_value = fitness_val;
+            }
+
+            fitness_sum+=fitness_val;
         }
+
+        avg_value = fitness_sum/pop_size;
+
+        System.out.println("best:" + best_value + " worst:" + worst_value + " avg:" + avg_value);
+        printArray(bi.getGenes());
+    }
+
+
+    public static void main(String[] args) {
+//        GeneticAlg ga = new GeneticAlg();
+//        ga.fillDstMx();
+//        ga.fillFlowMx();
+//
+//        for(Individual ind : ga.generateFirstPopulation(10).getIndividuals()){
+//            ga.printArray(ind.getGenes());
+//        }
 
 
         // ga.fixIndividual(new short[]{1, 2, 0, 3});
