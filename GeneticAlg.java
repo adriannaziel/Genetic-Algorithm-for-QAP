@@ -20,62 +20,18 @@ public class GeneticAlg {
         this.px = px;
         this.amount = amount;
 
-        fillFlowMx("had12_flow.txt");
-        fillDstMx("had12_dst.txt");
+        fillFlowMx("had"+amount+"_flow.txt");
+        fillDstMx("had"+amount+"_dst.txt");
 
     }
 
 
     public void fillFlowMx(String filename) {
-
         flow_matrix = new MatrixLoad().readMatrix(filename);
-//           flow_matrix = new short[][]{
-//                   {0, 1, 2, 2, 3, 4, 4, 5, 3, 5, 6, 7},
-//                   {1, 0, 1, 1, 2, 3, 3, 4, 2, 4, 5, 6},7
-//                   {2, 1, 0, 2, 1, 2, 2, 3, 1, 3, 4, 5},
-//                   {2, 1, 2, 0, 1, 2, 2, 3, 3, 3, 4, 5},
-//                   {3, 2, 1, 1, 0, 1, 1, 2, 2, 2, 3, 4},
-//                   {4, 3, 2, 2, 1, 0, 2, 3, 3, 1, 2, 3},
-//                   {4, 3, 2, 2, 1, 2, 0, 1, 3, 1, 2, 3},
-//                   {5, 4, 3, 3, 2, 3, 1, 0, 4, 2, 1, 2},
-//                   {3, 2, 1, 3, 2, 3, 3, 4, 0, 4, 5, 6},
-//                   {5, 4, 3, 3, 2, 1, 1, 2, 4, 0, 1, 2},
-//                   {6, 5, 4, 4, 3, 2, 2, 1, 5, 1, 0, 1},
-//                   {7, 6, 5, 5, 4, 3, 3, 2, 6, 2, 1, 0}
-//           };
-
-//        distance_matrix = new short[][]{
-//                {0,22,53,53},
-//                {22,0,40,62},
-//                {53,40,0,55},
-//                {53,62,55,0}
-//        };
     }
 
     public void fillDstMx(String filename) {
         distance_matrix = new MatrixLoad().readMatrix(filename);
-//            distance_matrix = new short[][]
-//                    {
-//                            {0, 3, 4, 6, 8, 5, 6, 6, 5, 1, 4, 6},
-//                            {3, 0, 6, 3, 7, 9, 9, 2, 2, 7, 4, 7},
-//                            {4, 6, 0, 2, 6, 4, 4, 4, 2, 6, 3, 6},
-//                            {6, 3, 2, 0, 5, 5, 3, 3, 9, 4, 3, 6},
-//                            {8, 7, 6, 5, 0, 4, 3, 4, 5, 7, 6, 7},
-//                            {5, 9, 4, 5, 4, 0, 8, 5, 5, 5, 7, 5},
-//                            {6, 9, 4, 3, 3, 8, 0, 6, 8, 4, 6, 7},
-//                            {6, 2, 4, 3, 4, 5, 6, 0, 1, 5, 5, 3},
-//                            {5, 2, 2, 9, 5, 5, 8, 1, 0, 4, 5, 2},
-//                            {1, 7, 6, 4, 7, 5, 4, 5, 4, 0, 7, 7},
-//                            {4, 4, 3, 3, 6, 7, 6, 5, 5, 7, 0, 9},
-//                            {6, 7, 6, 6, 7, 5, 7, 3, 2, 7, 9, 0}
-//                    };
-
-//        flow_matrix = new short[][]{
-//                {0,3,0,2},
-//                {3,0,0,1},
-//                {0,0,0,4},
-//                {2,1,4,0}
-//        };
     }
 
 
@@ -95,19 +51,17 @@ public class GeneticAlg {
             }
             start_pop.addIndividual(new Individual(new_genes));
         }
-
         return start_pop;
 
     }
 
 
-    public int countFitnessFunction(Individual individual) { // ?????
+    private int countFitnessFunction(Individual individual) {
         int fitness_val = 0;
 
         for (int i = 0; i < amount; i++) {
             for (int j = 0; j < amount; j++) {
-                if (i != j) { // opt czy potrzbne?
-                    //System.out.println(i+ " "+ j  );
+                if (i != j) {
                     fitness_val += distance_matrix[individual.getGene(i)][individual.getGene(j)] * flow_matrix[i][j];
                 }
             }
@@ -116,7 +70,7 @@ public class GeneticAlg {
     }
 
 
-    public Individual crossover(Individual individual1, Individual individual2) { // tak to losowe dziecko?
+    private Individual crossover(Individual individual1, Individual individual2) {
         Individual child_individual = new Individual(amount);
 
         if (new Random().nextDouble() <= 0.5) { //random child
@@ -135,14 +89,12 @@ public class GeneticAlg {
             for (int i = 1; i < amount; i += 2) {
                 child_individual.setGene(i, individual1.getGene(i));
             }
-
         }
-
-        return fixIndividual(child_individual); // return fixed
+        return fixIndividual(child_individual);
     }
 
 
-    public Individual mutate(Individual individual) { //todo better
+    private Individual mutate(Individual individual) { //todo better
         Random random = new Random();
         double mutation_nuber;
 
@@ -165,23 +117,20 @@ public class GeneticAlg {
     }
 
 
-    public Individual fixIndividual(Individual individual) {
-        // printArray(individual);
-
-
+    private Individual fixIndividual(Individual individual) {
         ArrayList<Short> lack_genes = new ArrayList<>();
-        for (Short s = 0; s < individual.getGenes().length; s++) { //adds all genes to array
+        for (Short s = 0; s < individual.getGenes().length; s++) { //dodaj wszystkie geny
             lack_genes.add(s);
         }
 
-        for (int i = 0; i < individual.getGenes().length; i++) { //removes genes that are in individual
+        for (int i = 0; i < individual.getGenes().length; i++) { //rusuwa te co sa w osobniku
             Short s = individual.getGene(i);
             if (lack_genes.contains(s)) {
                 lack_genes.remove(s);
             }
         }
 
-        for (int i = 0; i < individual.getGenes().length; i++) {  // if a gene is repeated, replaces it with a gene from lac_genes array
+        for (int i = 0; i < individual.getGenes().length; i++) {  // jak sie powtarza to bierze z tych ktorych nie bylo
             for (int j = 0; j < individual.getGenes().length; j++) {
                 if (i != j && individual.getGene(i) == individual.getGene(j)) {
                     Short tmp = lack_genes.get(lack_genes.size() - 1);
@@ -190,35 +139,28 @@ public class GeneticAlg {
                 }
             }
         }
-
-        //printArray(individual);
         return individual;
     }
 
-    public Individual selectByTournament(Population pop, int tournament_size) {  //todo : dopracowac dla ts=0
+
+    private Individual selectByTournament(Population pop, int tournament_size) {
+
         Population tournament_pop = new Population(tournament_size);
         Random random = new Random();
-
-
         int i = 0;
-        do {
-            int position = random.nextInt(tournament_size);   // moze wybrac te same... przekazywac kopie pop i usuwac tutaj z niej wybrane?
+
+        while (i <= tournament_size){
+            int position = random.nextInt(tournament_size);
             tournament_pop.addIndividual(pop.getIndividuals().get(position));
-
-            //System .out.println(i + " " + position );
-
             i += 1;
         }
-        while (i <= tournament_size);
+
 
         Individual best_individual = tournament_pop.getIndividuals().get(0);
         int best_fitness = countFitnessFunction(best_individual);
 
-        for (Individual ind : tournament_pop.getIndividuals()) { //bzsnsu bo 2 razy liczy dla 0
+        for (Individual ind : tournament_pop.getIndividuals()) {
             int fitness = countFitnessFunction(ind);
-
-            // printArray(ind.getGenes());
-            //System.out.println(fitness);
 
             if (fitness < best_fitness) {
                 best_fitness = fitness;
@@ -228,41 +170,8 @@ public class GeneticAlg {
         return best_individual;
     }
 
-    public Individual selectByRoulette(Population pop) {
-        Random random = new Random();
-        int total_fitness = 0;
 
-        for (Individual ind : pop.getIndividuals()) {
-            total_fitness += countFitnessFunction(ind);
-        }
-        int value = random.nextInt(total_fitness);
-        // locate the random value based on the weights
-        for (int i = 0; i < pop.getIndividuals().size(); i++) {
-            value -= countFitnessFunction(pop.getIndividuals().get(i));
-            if (value < 0) return pop.getIndividuals().get(i);
-        }
-        // when rounding errors occur, we return the last item's index
-        return pop.getIndividuals().get(pop.getIndividuals().size() - 1);
-    }
 
-    public Individual selectByRoulette2(Population pop) {
-        Random random = new Random();
-        int total_fitness = 0;
-
-        for (Individual ind : pop.getIndividuals()) {
-            total_fitness += countFitnessFunction(ind);
-        }
-
-        int randomNumber = random.nextInt(total_fitness + 1);
-        int runningSum = 0;
-        int index = 0;
-        while (runningSum < randomNumber) {
-            runningSum += countFitnessFunction(pop.getIndividuals().get(index));
-            index++;
-        }
-
-        return pop.getIndividuals().get(index - 1);
-    }
 
     public void printArray(short[] arr) {
         for (int i = 0; i < arr.length; i++) {
@@ -306,7 +215,7 @@ public class GeneticAlg {
 
                     double cross = random.nextDouble(); //random nr that determines wheather individual will be crossed
 
-                    if (cross <= px) {//crossover   //todo:słabo bo może wybrac siebie do krzyzowania
+                    if (cross <= px) {//crossover
                         Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1)); //random partner for crossover
                         Individual child = crossover(current_ind, partner);
                         new_population.addIndividual(child);
@@ -328,7 +237,7 @@ public class GeneticAlg {
         }
     }
 
-    public void runAlgorithmWithRoulette() { //params
+    public void runAlgorithmWithRoulette() {
         Population new_population = generateFirstPopulation(pop_size);
         Population old_population;
 
@@ -347,11 +256,11 @@ public class GeneticAlg {
 
                 for (int ind_nr = 0; ind_nr < pop_size; ind_nr++) {//tyle ile ma byc osobnikow w nowej
 
-                    Individual current_ind = selectByRoulette(old_population);
+                    Individual current_ind = rouletteSelect(old_population);//selectByRoulette(old_population);
 
-                    double cross = random.nextDouble(); //random nr that determines wheather individual will be crossed
+                    double cross = random.nextDouble(); //czy bedzie krzyzowany
 
-                    if (cross <= px) {//crossover   //todo:słabo bo może wybrac siebie do krzyzowania
+                    if (cross <= px) {//crossover
                         Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1)); //random partner for crossover
                         Individual child = crossover(current_ind, partner);
                         new_population.addIndividual(child);
@@ -362,8 +271,6 @@ public class GeneticAlg {
                     }// else if(cross<=px){
 
                 }//for(int ind_nr=0; ind_nr <pop_size;i++){
-
-
             }//for(generation_nr...)
 
             writer.flush();
@@ -373,8 +280,30 @@ public class GeneticAlg {
         }
     }
 
+    private Individual rouletteSelect(Population pop ) {
 
-    private void populationResults(Population population, FileWriter writer) throws IOException { //0?  //todo: writing to csv file
+        int total_fitness = 0;
+        for(Individual ind : pop.getIndividuals()) {
+            total_fitness += countFitnessFunction(ind);
+        }
+
+        ArrayList<Double> ind_fitness = new ArrayList<>();
+
+        for(Individual ind : pop.getIndividuals()) {
+            ind_fitness.add( (double)countFitnessFunction(ind)/total_fitness);
+        }
+
+        double rand_value =  new Random().nextDouble();
+        int c=0;
+        for(Individual ind : pop.getIndividuals()) {
+            rand_value-= 1/countFitnessFunction(ind);
+            if(rand_value<0) return ind;
+        }
+        return pop.getIndividuals().get(pop.pop_size-1);
+    }
+
+
+    private void populationResults(Population population, FileWriter writer) throws IOException {
         int best_value = countFitnessFunction(population.getIndividuals().get(0));
         int worst_value = countFitnessFunction(population.getIndividuals().get(0));
         int avg_value = 0;
@@ -403,74 +332,18 @@ public class GeneticAlg {
 
         System.out.println("best:" + best_value + " worst:" + worst_value + " avg:" + avg_value);
 
-        //String csvFile = "/Users/mkyong/csv/abc.csv";
-
         try {
             CSVUtils.writeLine(writer, Arrays.asList(String.valueOf(worst_value), String.valueOf(avg_value), String.valueOf(best_value)));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-
         printArray(bi.getGenes());
     }
 
 
-//
-//    public void readMatrixes(String filename) {
-//
-//        try (Scanner scanner = new Scanner(new BufferedReader(new FileReader(filename)))) {
-//            amount = scanner.nextShort();
-//            System.out.println(amount);
-//            ArrayList<Short> elems = new ArrayList<>();
-//
-//            while (scanner.hasNextShort()) {
-//
-//                //System.out.println(scanner.nextShort());
-//                elems.add(scanner.nextShort());
-//
-//            }
-//            System.out.println(elems.size());
-////            System.out.println(elems.toString());
-//
-//            //                // short[][] distance = new short[amount][amount];
-////                for (int i = 0; i < amount; i++) {
-////                    for (int j = 0; j < amount; j++) {
-////                        flow_matrix[i][j] = elems.get(i+j);
-////                    }
-////                }
-//
-//            for (int i = 0; i < amount; i++){
-//                flow_matrix[i/amount][i%amount] = elems.get(i);
-//            }
-//
-//                //flow_matrix = d1istance;
-//
-////                //short[][] flow = new short[amount][amount];
-////                for (int i = 0; i < amount; i++) {
-////                    for (int j = 0; j < amount; j++) {
-////                        distance_matrix[i][j] = elems.get(amount+i+j);
-////                    }
-//               // }
-//        } catch (FileNotFoundException e) {
-//        }
-//    }
-
 
     public static void main(String[] args) {
-//        GeneticAlg ga = new GeneticAlg();
-//        ga.fillDstMx();
-//        ga.fillFlowMx();
-//
-//        for(Individual ind : ga.generateFirstPopulation(10).getIndividuals()){
-//            ga.printArray(ind.getGenes());
-//        }
-
-
-        // ga.fixIndividual(new short[]{1, 2, 0, 3});
-
-
-
     }
 }
 

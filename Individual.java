@@ -1,4 +1,4 @@
-public class Individual {
+public class Individual{
 
     private short[] genes;
 
@@ -25,5 +25,10 @@ public class Individual {
     public void setGene(int position, short value){
         genes[position] = value;
     }
+
+    public Individual clone(){
+        return  new Individual(this.genes.clone());
+    }
+
 
 }
