@@ -237,6 +237,47 @@ public class GeneticAlg {
         }
     }
 
+    public ArrayList<Tuple<Integer,Integer,Integer>> runAlgorithmWithTournamentTuples(int tournament_size) { //params
+        Population new_population = generateFirstPopulation(pop_size);
+        Population old_population;
+
+        Random random = new Random();
+
+        ArrayList<Tuple<Integer,Integer,Integer>> results = new ArrayList<>(generations);
+
+            for (int generation_nr = 0; generation_nr < generations; generation_nr++) {//DLA KAZDEJ POPULACJI
+                //best worse avg
+
+                results.add(populationResultsTuple(new_population));
+
+                old_population = new_population;
+                new_population = new Population(pop_size);
+
+
+                for (int ind_nr = 0; ind_nr < pop_size; ind_nr++) {//tyle ile ma byc osobnikow w nowej
+
+                    Individual current_ind = selectByTournament(old_population, tournament_size);
+
+                    double cross = Math.random();//random.nextDouble(); //random nr that determines wheather individual will be crossed
+
+                    if (cross <= px) {//crossover
+                        Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1)); //random partner for crossover
+                        Individual child = crossover(current_ind, partner);
+                        new_population.addIndividual(child);
+                    }//if(cross<=px)
+                    else {//no crossover
+                        Individual ind_to_new_pop = mutate(current_ind.clone());//MUTOWAĆ KOPIĘ!!!
+                        new_population.addIndividual(ind_to_new_pop);
+                    }// else if(cross<=px){
+
+                }//for(int ind_nr=0; ind_nr <pop_size;i++){
+
+
+            }//for(generation_nr...)
+            return results;
+
+    }
+
     public void runAlgorithmWithRoulette() {
         Population new_population = generateFirstPopulation(pop_size);
         Population old_population;
@@ -330,7 +371,7 @@ public class GeneticAlg {
         avg_value = fitness_sum / pop_size;
 
 
-        System.out.println("best:" + best_value + " worst:" + worst_value + " avg:" + avg_value);
+       // System.out.println("best:" + best_value + " worst:" + worst_value + " avg:" + avg_value);
 
         try {
             CSVUtils.writeLine(writer, Arrays.asList(String.valueOf(worst_value), String.valueOf(avg_value), String.valueOf(best_value)));
@@ -341,6 +382,36 @@ public class GeneticAlg {
         printArray(bi.getGenes());
     }
 
+
+    private Tuple<Integer,Integer,Integer> populationResultsTuple(Population population)  {
+        int best_value = countFitnessFunction(population.getIndividuals().get(0));
+        int worst_value = countFitnessFunction(population.getIndividuals().get(0));
+        int avg_value = 0;
+        int fitness_sum = 0;
+
+
+
+        for (Individual ind : population.getIndividuals()) {
+            int fitness_val = countFitnessFunction(ind);
+
+            if (fitness_val < best_value) {
+                best_value = fitness_val;
+            }
+
+            if (fitness_val > worst_value) {
+                worst_value = fitness_val;
+            }
+
+            fitness_sum += fitness_val;
+        }
+
+        avg_value = fitness_sum / pop_size;
+
+
+        //System.out.println("best:" + best_value + " worst:" + worst_value + " avg:" + avg_value);
+
+        return new Tuple(best_value,avg_value,worst_value);
+    }
 
 
     public static void main(String[] args) {
