@@ -1,4 +1,3 @@
-import java.io.*;
 import java.util.*;
 
 public class GeneticAlg {
@@ -94,7 +93,7 @@ public class GeneticAlg {
     }
 
 
-    private Individual mutate(Individual individual) { //todo better
+    private Individual mutate(Individual individual) {
         Random random = new Random();
         double mutation_nuber;
 
@@ -102,18 +101,14 @@ public class GeneticAlg {
             mutation_nuber = random.nextDouble();
             if (mutation_nuber <= pm) { // swap
                 int swap_place = random.nextInt(individual.getGenes().length - 1);
-                // printArray(individual);
 
                 //swapping:
                 short tmp = individual.getGene(i);
                 individual.setGene(i, individual.getGene(swap_place));
                 individual.setGene(swap_place, tmp);
-
-                //printArray(individual);
-            }
+                }
         }
         return individual;
-        //return fixIndividual(individual); // jak bez swapa tylko inaczej mutacja
     }
 
 
@@ -123,7 +118,7 @@ public class GeneticAlg {
             lack_genes.add(s);
         }
 
-        for (int i = 0; i < individual.getGenes().length; i++) { //rusuwa te co sa w osobniku
+        for (int i = 0; i < individual.getGenes().length; i++) { //usuwa te co sa w osobniku
             Short s = individual.getGene(i);
             if (lack_genes.contains(s)) {
                 lack_genes.remove(s);
@@ -150,7 +145,7 @@ public class GeneticAlg {
         int i = 0;
 
         while (i <= tournament_size){
-            int position = random.nextInt(tournament_size);
+            int position = random.nextInt(pop_size);
             tournament_pop.addIndividual(pop.getIndividuals().get(position));
             i += 1;
         }
@@ -173,223 +168,127 @@ public class GeneticAlg {
 
 
 
-    public void printArray(short[] arr) {
-        for (int i = 0; i < arr.length; i++) {
-            System.out.print(arr[i] + ", ");
-        }
-        System.out.println();
-    }
+    Individual selectByRoulette(Population population){
 
-    public void printMx(short[][] matrix) {
-        for (int i = 0; i < amount; i++) {
-            for (int j = 0; j < amount; j++) {
-                System.out.print(matrix[i][j] + " ");
+        double[] fitness_reversed_array = new double[pop_size];
+
+        for (int i = 0; i < pop_size; i++){
+            double cost = countFitnessFunction(population.getIndividuals().get(i));
+            fitness_reversed_array[i] = 1/cost;
+        }
+
+        double sum = 0;
+
+        for (int i=0; i < fitness_reversed_array.length; i++){
+            sum += fitness_reversed_array[i];
+        }
+
+        double[] weights = new double [fitness_reversed_array.length];
+        double last_weight = 0;
+
+        for (int i=0; i < weights.length; i++){
+            weights[i] = last_weight + fitness_reversed_array[i] / sum;
+            last_weight = weights[i];
+        }
+
+        double random = Math.random();
+
+        for(int i = 0; i < weights.length; i++) {
+            if(random - weights[i] < 0){
+                return population.getIndividuals().get(i);
             }
-            System.out.println();
         }
-
+        return population.getIndividuals().get(weights.length - 1);
     }
 
 
-    public void runAlgorithmWithTournament(int tournament_size) { //params
+
+
+    public ArrayList<Tuple<Integer,Integer,Integer, Double>> runAlgorithmWithTournament(int tournament_size) {
         Population new_population = generateFirstPopulation(pop_size);
         Population old_population;
 
         Random random = new Random();
 
-        try (FileWriter writer = new FileWriter("Results_tournament.csv")) {
+        ArrayList<Tuple<Integer,Integer,Integer, Double>> results = new ArrayList<>(generations);
 
+            for (int generation_nr = 0; generation_nr < generations; generation_nr++) {
 
-            for (int generation_nr = 0; generation_nr < generations; generation_nr++) {//DLA KAZDEJ POPULACJI
-                //best worse avg
-
-                populationResults(new_population, writer);
+                results.add(populationResults(new_population));
 
                 old_population = new_population;
                 new_population = new Population(pop_size);
 
 
-                for (int ind_nr = 0; ind_nr < pop_size; ind_nr++) {//tyle ile ma byc osobnikow w nowej
+                for (int ind_nr = 0; ind_nr < pop_size; ind_nr++) {
 
                     Individual current_ind = selectByTournament(old_population, tournament_size);
 
-                    double cross = random.nextDouble(); //random nr that determines wheather individual will be crossed
+                    double cross = Math.random();
 
                     if (cross <= px) {//crossover
-                        Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1)); //random partner for crossover
+                        Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1));
                         Individual child = crossover(current_ind, partner);
                         new_population.addIndividual(child);
-                    }//if(cross<=px)
+                    }
                     else {//no crossover
-                        Individual ind_to_new_pop = mutate(current_ind.clone());//MUTOWAĆ KOPIĘ!!!
+                        Individual ind_to_new_pop = mutate(current_ind.clone());
                         new_population.addIndividual(ind_to_new_pop);
-                    }// else if(cross<=px){
-
-                }//for(int ind_nr=0; ind_nr <pop_size;i++){
-
-
-            }//for(generation_nr...)
-
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public ArrayList<Tuple<Integer,Integer,Integer>> runAlgorithmWithTournamentTuples(int tournament_size) { //params
-        Population new_population = generateFirstPopulation(pop_size);
-        Population old_population;
-
-        Random random = new Random();
-
-        ArrayList<Tuple<Integer,Integer,Integer>> results = new ArrayList<>(generations);
-
-            for (int generation_nr = 0; generation_nr < generations; generation_nr++) {//DLA KAZDEJ POPULACJI
-                //best worse avg
-
-                results.add(populationResultsTuple(new_population));
-
-                old_population = new_population;
-                new_population = new Population(pop_size);
-
-
-                for (int ind_nr = 0; ind_nr < pop_size; ind_nr++) {//tyle ile ma byc osobnikow w nowej
-
-                    Individual current_ind = selectByTournament(old_population, tournament_size);
-
-                    double cross = Math.random();//random.nextDouble(); //random nr that determines wheather individual will be crossed
-
-                    if (cross <= px) {//crossover
-                        Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1)); //random partner for crossover
-                        Individual child = crossover(current_ind, partner);
-                        new_population.addIndividual(child);
-                    }//if(cross<=px)
-                    else {//no crossover
-                        Individual ind_to_new_pop = mutate(current_ind.clone());//MUTOWAĆ KOPIĘ!!!
-                        new_population.addIndividual(ind_to_new_pop);
-                    }// else if(cross<=px){
-
-                }//for(int ind_nr=0; ind_nr <pop_size;i++){
-
-
-            }//for(generation_nr...)
+                    }
+                }
+            }
             return results;
 
     }
 
-    public void runAlgorithmWithRoulette() {
+
+
+    public ArrayList<Tuple<Integer,Integer,Integer, Double>> runAlgorithmWithRoulette() {
         Population new_population = generateFirstPopulation(pop_size);
         Population old_population;
 
         Random random = new Random();
 
-        try (FileWriter writer = new FileWriter("Results_roulette.csv")) {
+        ArrayList<Tuple<Integer,Integer,Integer, Double>> results = new ArrayList<>(generations);
+
+        for (int generation_nr = 0; generation_nr < generations; generation_nr++) {
+
+            results.add(populationResults(new_population));
+
+            old_population = new_population;
+            new_population = new Population(pop_size);
 
 
-            for (int generation_nr = 0; generation_nr < generations; generation_nr++) {//DLA KAZDEJ POPULACJI
+            for (int ind_nr = 0; ind_nr < pop_size; ind_nr++) {
 
-                populationResults(new_population, writer);
+                Individual current_ind = selectByRoulette(old_population);
 
-                old_population = new_population;
-                new_population = new Population(pop_size);
+                double cross = Math.random();
 
-
-                for (int ind_nr = 0; ind_nr < pop_size; ind_nr++) {//tyle ile ma byc osobnikow w nowej
-
-                    Individual current_ind = rouletteSelect(old_population);//selectByRoulette(old_population);
-
-                    double cross = random.nextDouble(); //czy bedzie krzyzowany
-
-                    if (cross <= px) {//crossover
-                        Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1)); //random partner for crossover
-                        Individual child = crossover(current_ind, partner);
-                        new_population.addIndividual(child);
-                    }//if(cross<=px)
-                    else {//no crossover
-                        Individual ind_to_new_pop = mutate(current_ind.clone());//MUTOWAĆ KOPIĘ!!!
-                        new_population.addIndividual(ind_to_new_pop);
-                    }// else if(cross<=px){
-
-                }//for(int ind_nr=0; ind_nr <pop_size;i++){
-            }//for(generation_nr...)
-
-            writer.flush();
-            writer.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+                if (cross <= px) {//crossover
+                    Individual partner = old_population.getIndividuals().get(random.nextInt(pop_size - 1));
+                    Individual child = crossover(current_ind, partner);
+                    new_population.addIndividual(child);
+                }
+                else {//no crossover
+                    Individual ind_to_new_pop = mutate(current_ind.clone());
+                    new_population.addIndividual(ind_to_new_pop);
+                }
+            }
         }
-    }
+        return results;
 
-    private Individual rouletteSelect(Population pop ) {
-
-        int total_fitness = 0;
-        for(Individual ind : pop.getIndividuals()) {
-            total_fitness += countFitnessFunction(ind);
-        }
-
-        ArrayList<Double> ind_fitness = new ArrayList<>();
-
-        for(Individual ind : pop.getIndividuals()) {
-            ind_fitness.add( (double)countFitnessFunction(ind)/total_fitness);
-        }
-
-        double rand_value =  new Random().nextDouble();
-        int c=0;
-        for(Individual ind : pop.getIndividuals()) {
-            rand_value-= 1/countFitnessFunction(ind);
-            if(rand_value<0) return ind;
-        }
-        return pop.getIndividuals().get(pop.pop_size-1);
     }
 
 
-    private void populationResults(Population population, FileWriter writer) throws IOException {
+
+
+
+    private Tuple<Integer,Integer,Integer, Double> populationResults(Population population)  {
         int best_value = countFitnessFunction(population.getIndividuals().get(0));
         int worst_value = countFitnessFunction(population.getIndividuals().get(0));
         int avg_value = 0;
         int fitness_sum = 0;
-
-
-        Individual bi = population.getIndividuals().get(0);
-
-        for (Individual ind : population.getIndividuals()) {
-            int fitness_val = countFitnessFunction(ind);
-
-            if (fitness_val < best_value) {
-                best_value = fitness_val;
-                bi = ind;
-            }
-
-            if (fitness_val > worst_value) {
-                worst_value = fitness_val;
-            }
-
-            fitness_sum += fitness_val;
-        }
-
-        avg_value = fitness_sum / pop_size;
-
-
-       // System.out.println("best:" + best_value + " worst:" + worst_value + " avg:" + avg_value);
-
-        try {
-            CSVUtils.writeLine(writer, Arrays.asList(String.valueOf(worst_value), String.valueOf(avg_value), String.valueOf(best_value)));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        printArray(bi.getGenes());
-    }
-
-
-    private Tuple<Integer,Integer,Integer> populationResultsTuple(Population population)  {
-        int best_value = countFitnessFunction(population.getIndividuals().get(0));
-        int worst_value = countFitnessFunction(population.getIndividuals().get(0));
-        int avg_value = 0;
-        int fitness_sum = 0;
-
-
 
         for (Individual ind : population.getIndividuals()) {
             int fitness_val = countFitnessFunction(ind);
@@ -408,13 +307,18 @@ public class GeneticAlg {
         avg_value = fitness_sum / pop_size;
 
 
-        //System.out.println("best:" + best_value + " worst:" + worst_value + " avg:" + avg_value);
+        double standdev =0;
+        for (Individual ind : population.getIndividuals()) {
+            int fitness_val = countFitnessFunction(ind);
+            standdev += (fitness_val-avg_value) * (fitness_val-avg_value) ;
+        }
 
-        return new Tuple(best_value,avg_value,worst_value);
+        standdev /= pop_size;
+        standdev = Math.sqrt(standdev);
+
+        return new Tuple(best_value,avg_value,worst_value, (standdev));
     }
 
 
-    public static void main(String[] args) {
-    }
 }
 

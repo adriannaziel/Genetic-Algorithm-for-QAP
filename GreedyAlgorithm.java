@@ -4,7 +4,7 @@ public class GreedyAlgorithm {
 
 
 
-    public short[] greedyAlg2 ( int size, short[][]flow_matrix, short [][] distance_matrix){
+    public short[] greedyAlg ( int size, short[][]flow_matrix, short [][] distance_matrix){
 
         short[] result = new short[size];
         ArrayList<Short> already_chosen = new ArrayList<Short>(size);
@@ -67,15 +67,27 @@ public class GreedyAlgorithm {
     }
 
 
+    private int countFitnessFunction(short[] individual, short[][] distance_matrix, short[][] flow_matrix) {
+        int fitness_val = 0;
+
+
+        for (int i = 0; i < individual.length; i++) {
+            for (int j = 0; j < individual.length; j++) {
+                if (i != j) {
+                    fitness_val += distance_matrix[individual[i]][individual[j]] * flow_matrix[i][j];
+                }
+            }
+        }
+        return fitness_val;
+    }
 
     public static void main(String[] args){
-//        GreedyAlgorithm ga = new GreedyAlgorithm();
-//        short[][] flow = new MatrixLoad().readMatrix("had12_flow.txt");
-//        short[][] dst = new MatrixLoad().readMatrix("had12_dst.txt");
-//        short[] res1 = ga.greedyAlg2(12, flow, dst);
-//        ga.printArray( res1);
-//        System.out.println(ga.countFitnessFunction(res1, flow,dst,12));
-
+        GreedyAlgorithm ga = new GreedyAlgorithm();
+        short[][] flow = new MatrixLoad().readMatrix("had20_flow.txt");
+        short[][] dst = new MatrixLoad().readMatrix("had20_dst.txt");
+        short[] res1 = ga.greedyAlg(20, flow, dst);
+        ga.printArray( res1);
+        System.out.println(ga.countFitnessFunction(res1, flow,dst));
 
     }
 
