@@ -1,2 +1,4 @@
 # Genetic-Algorithm-for-QAP
-Artifical Inteligence Project
+Artifical Inteligence Class Project
+
+Genetic algorithm to solve Quadratic assignment problem
